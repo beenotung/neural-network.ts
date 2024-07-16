@@ -21,6 +21,7 @@ export let fn = {
   normalized_tanh,
   linear,
   relu,
+  elu,
 }
 
 export function sigmoid(x: number): number {
@@ -45,6 +46,19 @@ export function linear(x: number): number {
 
 export function relu(x: number): number {
   return x < 0 ? 0 : x
+}
+
+export function elu(x: number): number {
+  return x < 0 ? Math.exp(x) - 1 : x
+}
+
+export function derivative(activation: Activation, x: number): number {
+  let step = 1e-12
+  let left = activation(x - step)
+  let right = activation(x + step)
+  let dy = right - left
+  let dx = step + step
+  return dy / dx
 }
 
 export type Activation = (x: number) => number
