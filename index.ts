@@ -24,11 +24,11 @@ export let fn = {
 }
 
 export function sigmoid(x: number): number {
-  return 1 / (1 + Math.exp(x))
+  return 1 / (1 + Math.exp(-x))
 }
 
 export function centered_sigmoid(x: number): number {
-  return (1 / (1 + Math.exp(x))) * 2 - 1
+  return (1 / (1 + Math.exp(-x))) * 2 - 1
 }
 
 export function tanh(x: number): number {
