@@ -19,7 +19,7 @@ export function sigmoid(x: number): number {
 }
 
 export function centered_sigmoid(x: number): number {
-  return sigmoid(x) * 2 - 1
+  return (1 / (1 + Math.exp(x))) * 2 - 1
 }
 
 export function tanh(x: number): number {
@@ -27,7 +27,7 @@ export function tanh(x: number): number {
 }
 
 export function normalized_tanh(x: number): number {
-  return (tanh(x) + 1) / 2
+  return (Math.tanh(x) + 1) / 2
 }
 
 export function linear(x: number): number {
@@ -71,9 +71,9 @@ export function random_network(options: NetworkSpec): Network {
     activations: [],
   }
   let { weights, biases, activations } = network
-  for (let i = 1; i < layers.length; i++) {
-    let input_size = layers[i - 1].size
-    let output_size = layers[i].size
+  for (let l = 1; l < layers.length; l++) {
+    let input_size = layers[l - 1].size
+    let output_size = layers[l].size
     let weight = new Array(output_size)
     let bias = new Array(output_size)
     for (let o = 0; o < output_size; o++) {
@@ -93,7 +93,7 @@ export function random_network(options: NetworkSpec): Network {
         random_around_zero(0.1)
       /* full range */
       //  random_around_zero(2)
-      activations[o] = layers[i].activation
+      activations[l - 1] = layers[l].activation
     }
     weights.push(weight)
     biases.push(bias)
@@ -133,6 +133,95 @@ export function forward(network: Network, inputs: number[]) {
   }
 
   return inputs
+}
+
+export interface CompiledNetwork {
+  (inputs: number[]): number[]
+}
+
+export function compile(network: Network): CompiledNetwork {
+  let code_functions = ''
+  let code_calc = ''
+
+  let { weights, biases, activations } = network
+  let layer_size = weights.length
+
+  let counter = 0
+
+  // function code -> name
+  let function_cache = new Map<string, string>()
+
+  function get_function_name(fn: Function): string {
+    let code = fn.toString()
+    let name = function_cache.get(code)
+    if (!name) {
+      name = 'f_' + (function_cache.size + 1)
+      function_cache.set(code, name)
+      code_functions += `
+let ${name} = (${code})`
+    }
+    return name
+  }
+
+  let inputs: string[] = new Array(weights[0][0].length)
+  for (let i = 0; i < inputs.length; i++) {
+    inputs[i] = `inputs[${i}]`
+  }
+  for (let l = 0; l < layer_size; l++) {
+    let bias = biases[l]
+    let activation_fn_name = get_function_name(activations[l])
+    let input_size = weights[l][0].length
+    let output_size = bias.length
+    let outputs = new Array(output_size)
+
+    if (l == layer_size - 1) {
+      code_calc += `
+/* output layer */`
+    } else {
+      code_calc += `
+/* layer ${l + 1} */`
+    }
+
+    for (let o = 0; o < output_size; o++) {
+      counter++
+      let output = `v_${counter}`
+      code_calc += `
+let ${output} = ${activation_fn_name}(0`
+      let weight = weights[l][o]
+      for (let i = 0; i < input_size; i++) {
+        code_calc += ` + ${weight[i]} * ${inputs[i]}`
+      }
+      code_calc += ` + ${bias[o]})`
+      outputs[o] = output
+    }
+
+    code_calc += `
+`
+
+    inputs = outputs
+  }
+
+  return new Function(
+    'inputs',
+    `
+return function inference(inputs) {
+/**************************
+ ** activation functions **
+ **************************/
+${code_functions}
+
+/************
+ ** layers **
+ ************/
+${code_calc}
+return [${inputs}]
+}
+`
+      .trim()
+      .split('\n')
+      .join('\n  ')
+      .replace(/  }$/, '}'),
+  )() as CompiledNetwork
 }
 
 // TODO auto increase mutation_amount when the best fitness is not improving continuously

@@ -9,7 +9,8 @@ Zero-dependency Neural Network in Typescript
 
 ## Features
 
-- Evolve Neural Network with Genetic Algorithm
+- Evolve neural network with genetic algorithm
+- Compile neural network into standalone javascript function
 - Zero-dependency
 - Lightweight (without node-gpy, cmake, python, cuda)
 - Typescript support
