@@ -8,6 +8,7 @@ import {
   tanh,
   linear,
   relu,
+  to_json,
 } from './index'
 import { writeFileSync } from 'fs'
 
@@ -51,12 +52,15 @@ console.dir(network, { depth: 20 })
 let inference = compile(network)
 
 console.log(inference.toString())
+
 writeFileSync(
   'xor.js',
   `
 exports.inference = ${inference.toString()}
 `,
 )
+
+writeFileSync('xor.json', JSON.stringify(to_json(network), null, 2))
 
 function test(inputs: number[], target: number) {
   let output = inference(inputs)[0]

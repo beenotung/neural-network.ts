@@ -14,6 +14,15 @@ export type Network = {
   activations: Activation[]
 }
 
+export let fn = {
+  sigmoid,
+  centered_sigmoid,
+  tanh,
+  normalized_tanh,
+  linear,
+  relu,
+}
+
 export function sigmoid(x: number): number {
   return 1 / (1 + Math.exp(x))
 }
@@ -222,6 +231,46 @@ return [${inputs}]
       .join('\n  ')
       .replace(/  }$/, '}'),
   )() as CompiledNetwork
+}
+
+export type NetworkJSON = ReturnType<typeof to_json>
+
+export function to_json(network: Network) {
+  let fn_names = new Map(
+    Object.entries(fn).map(([name, activation]) => [
+      activation,
+      name as keyof typeof fn,
+    ]),
+  )
+  return {
+    weights: network.weights,
+    biases: network.biases,
+    activations: network.activations.map((activation, index) => {
+      let name = fn_names.get(activation)
+      if (!name) {
+        throw new Error(
+          `unknown activation function, layer index: ${index}, function: ${activation}`,
+        )
+      }
+      return name
+    }),
+  }
+}
+
+export function from_json(json: NetworkJSON): Network {
+  return {
+    weights: json.weights,
+    biases: json.biases,
+    activations: json.activations.map((name, index) => {
+      let activation = fn[name]
+      if (!name) {
+        throw new Error(
+          `unknown activation function, layer index: ${index}, name: ${name}`,
+        )
+      }
+      return activation
+    }),
+  }
 }
 
 // TODO auto increase mutation_amount when the best fitness is not improving continuously
