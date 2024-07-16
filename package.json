@@ -1,0 +1,42 @@
+{
+  "name": "neural-network.ts",
+  "version": "0.0.0",
+  "description": "Zero-dependency Neural Network in Typescript",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "browser": "dist/browser.js",
+  "unpkg": "dist/browser.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "test": "ts-mocha index.spec.ts",
+    "coverage": "nyc npm test",
+    "build": "run-s clean transpile",
+    "clean": "rimraf dist",
+    "transpile": "run-p esbuild tsc",
+    "esbuild": "esbuild --bundle --outfile=dist/browser.js browser.ts",
+    "tsc": "tsc -p ."
+  },
+  "dependencies": {
+    "ga-island": "^3.0.1"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.3.5",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^20.6.2",
+    "chai": "^4.3.7",
+    "esbuild": "^0.23.0",
+    "mocha": "^10.2.0",
+    "npm-run-all": "^4.1.5",
+    "nyc": "^15.1.0",
+    "rimraf": "^5.0.1",
+    "ts-mocha": "^10.0.0",
+    "ts-node": "^10.9.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.2.2"
+  }
+}
