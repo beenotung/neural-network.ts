@@ -10,5 +10,10 @@
     "incremental": false,
     "outDir": "dist"
   },
-  "files": ["index.ts"]
+  "files": [
+    "index.ts"
+  ],
+  "exclude": [
+    "dist"
+  ]
 }
