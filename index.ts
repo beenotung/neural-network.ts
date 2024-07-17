@@ -24,36 +24,75 @@ export let fn = {
   elu,
 }
 
+export let fn_derivative = new Map<Activation, Activation>()
+fn_derivative.set(sigmoid, sigmoid_prime)
+fn_derivative.set(centered_sigmoid, centered_sigmoid_prime)
+fn_derivative.set(tanh, tanh_prime)
+fn_derivative.set(normalized_tanh, normalized_tanh_prime)
+fn_derivative.set(linear, linear_prime)
+fn_derivative.set(relu, relu_prime)
+fn_derivative.set(elu, elu_prime)
+
 export function sigmoid(x: number): number {
   return 1 / (1 + Math.exp(-x))
+}
+
+export function sigmoid_prime(x: number): number {
+  let y = sigmoid(x)
+  return y * (1 - y)
 }
 
 export function centered_sigmoid(x: number): number {
   return (1 / (1 + Math.exp(-x))) * 2 - 1
 }
 
+export function centered_sigmoid_prime(x: number): number {
+  return sigmoid_prime(x) * 2
+}
+
 export function tanh(x: number): number {
   return Math.tanh(x)
+}
+
+export function tanh_prime(x: number): number {
+  let y = tanh(x)
+  return 1 - y * y
 }
 
 export function normalized_tanh(x: number): number {
   return (Math.tanh(x) + 1) / 2
 }
 
+export function normalized_tanh_prime(x: number): number {
+  return tanh_prime(x) / 2
+}
+
 export function linear(x: number): number {
   return x
+}
+
+export function linear_prime(x: number): number {
+  return 1
 }
 
 export function relu(x: number): number {
   return x < 0 ? 0 : x
 }
 
+export function relu_prime(x: number): number {
+  return x < 0 ? 0 : 1
+}
+
 export function elu(x: number): number {
   return x < 0 ? Math.exp(x) - 1 : x
 }
 
+export function elu_prime(x: number): number {
+  return x < 0 ? Math.exp(x) : 1
+}
+
 export function derivative(activation: Activation, x: number): number {
-  let step = 1e-12
+  let step = 2e-5
   let left = activation(x - step)
   let right = activation(x + step)
   let dy = right - left
@@ -109,13 +148,19 @@ export function random_network(options: NetworkSpec): Network {
             : random_between(+0.4, +0.6)
         /* full range */
         // random_around_zero(1)
+        /* 0..1 */
+        // Math.random()
+        /* zero */
+        // 0
       }
       weight[o] = w
       bias[o] =
         /* slight bias */
         random_around_zero(0.1)
       /* full range */
-      //  random_around_zero(2)
+      // random_around_zero(2)
+      /* zero */
+      // 0
       activations[l - 1] = layers[l].activation
     }
     weights.push(weight)
@@ -156,6 +201,90 @@ export function forward(network: Network, inputs: number[]) {
   }
 
   return inputs
+}
+
+export function learn(
+  network: Network,
+  inputs: number[],
+  targets: number[],
+  /** @example 0.2 or 0.01 */
+  learning_rate: number,
+) {
+  let { weights, biases, activations } = network
+  let layer_size = weights.length
+
+  // layer index -> output index -> output value
+  let values: number[][] = new Array(layer_size + 1)
+  values[0] = inputs
+
+  // forward
+  for (let l = 0; l < layer_size; l++) {
+    let bias = biases[l]
+    let activation = activations[l]
+    let input_size = weights[l][0].length
+    let output_size = bias.length
+    let outputs = new Array(output_size)
+    for (let o = 0; o < output_size; o++) {
+      let acc = 0
+      let weight = weights[l][o]
+      for (let i = 0; i < input_size; i++) {
+        acc += weight[i] * inputs[i]
+      }
+      acc += bias[o]
+      outputs[o] = activation(acc)
+      values[l + 1] = outputs
+    }
+    inputs = outputs
+  }
+
+  // calculate error
+  let mse = 0
+  let output_errors = new Array(inputs.length)
+  for (let i = 0; i < inputs.length; i++) {
+    let e = targets[i] - inputs[i]
+    output_errors[i] = e
+    mse += e * e
+  }
+  mse /= inputs.length
+
+  // backward
+  for (let l = layer_size - 1; l >= 0; l--) {
+    let bias = biases[l]
+    const activation = activations[l]
+    let activation_prime =
+      fn_derivative.get(activation) ||
+      ((x: number) => derivative(activation, x))
+    let input_size = weights[l][0].length
+    let output_size = bias.length
+    let inputs = values[l]
+    let outputs = values[l + 1]
+
+    let input_errors = new Array(input_size).fill(0)
+
+    for (let o = 0; o < output_size; o++) {
+      let weight = weights[l][o]
+      let output = outputs[o]
+
+      // TODO handle when (output) or (1 - output) is zero
+      let d_output = output_errors[o] * activation_prime(inputs[o])
+
+      for (let i = 0; i < input_size; i++) {
+        let input = inputs[i]
+
+        // TODO handle when (input) is zero
+        let d_input = d_output * weight[i]
+        input_errors[i] += d_input
+
+        weight[i] += d_output * input * learning_rate
+      }
+
+      bias[o] += d_output * learning_rate
+    }
+
+    output_errors = input_errors
+  }
+
+  return mse
 }
 
 export interface CompiledNetwork {

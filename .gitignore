@@ -7,4 +7,6 @@ xor.json
 .nyc_output
 package-lock.json
 yarn.lock
-plot-*.csv
+*.csv
+*-nn-xor.js
+*-nn-xor.json
