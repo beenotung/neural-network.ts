@@ -9,7 +9,9 @@ Zero-dependency Neural Network in Typescript
 
 ## Features
 
-- Evolve neural network with genetic algorithm
+- Duel mode training
+  - Train with back propagation
+  - Evolve neural network with genetic algorithm
 - Compile neural network into standalone javascript function
 - Export / import in json
 - Zero-dependency
