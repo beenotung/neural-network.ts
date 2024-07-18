@@ -91,6 +91,12 @@ export function elu_prime(x: number): number {
   return x < 0 ? Math.exp(x) : 1
 }
 
+export function get_derivative(activation: Activation): Activation {
+  return (
+    fn_derivative.get(activation) || ((x: number) => derivative(activation, x))
+  )
+}
+
 export function derivative(activation: Activation, x: number): number {
   let step = 2e-5
   let left = activation(x - step)
@@ -210,78 +216,100 @@ export function learn(
   /** @example 0.2 or 0.01 */
   learning_rate: number,
 ) {
+  /* forward */
+
   let { weights, biases, activations } = network
   let layer_size = weights.length
 
-  // layer index -> output index -> output value
-  let values: number[][] = new Array(layer_size + 1)
-  values[0] = inputs
+  // layer index -> output index -> x (acc value before activate)
+  let layer_values: number[][] = new Array(layer_size)
 
-  // forward
+  // layer index -> output index -> input value
+  let layer_inputs: number[][] = new Array(layer_size)
+
   for (let l = 0; l < layer_size; l++) {
     let bias = biases[l]
     let activation = activations[l]
     let input_size = weights[l][0].length
     let output_size = bias.length
+    let values = new Array(output_size)
     let outputs = new Array(output_size)
     for (let o = 0; o < output_size; o++) {
-      let acc = 0
       let weight = weights[l][o]
+      let acc = 0
       for (let i = 0; i < input_size; i++) {
         acc += weight[i] * inputs[i]
       }
       acc += bias[o]
+      values[o] = acc
       outputs[o] = activation(acc)
-      values[l + 1] = outputs
     }
+    layer_values[l] = values
+    layer_inputs[l] = inputs
     inputs = outputs
   }
+  let outputs = inputs
 
-  // calculate error
+  /* backward */
+
+  /* 1. calculate output error */
+
   let mse = 0
-  let output_errors = new Array(inputs.length)
-  for (let i = 0; i < inputs.length; i++) {
-    let e = targets[i] - inputs[i]
-    output_errors[i] = e
+
+  // layer index -> output index -> output error
+  let output_errors: number[] = new Array(outputs.length)
+  for (let o = 0; o < outputs.length; o++) {
+    let e = outputs[o] - targets[o]
+    output_errors[o] = e
     mse += e * e
   }
-  mse /= inputs.length
+  mse /= outputs.length
 
-  // backward
+  /* 2. calculate output gradient */
+
+  // layer index -> output index -> output gradient
+  let layer_gradients: number[][] = new Array(layer_size)
+
   for (let l = layer_size - 1; l >= 0; l--) {
-    let bias = biases[l]
-    const activation = activations[l]
-    let activation_prime =
-      fn_derivative.get(activation) ||
-      ((x: number) => derivative(activation, x))
     let input_size = weights[l][0].length
-    let output_size = bias.length
-    let inputs = values[l]
-    let outputs = values[l + 1]
-
-    let input_errors = new Array(input_size).fill(0)
-
+    let output_size = weights[l].length
+    let activation_prime = get_derivative(activations[l])
+    let output_values = layer_values[l]
+    let layer_weights = weights[l]
+    let output_gradients: number[] = new Array(output_size)
     for (let o = 0; o < output_size; o++) {
-      let weight = weights[l][o]
-      let output = outputs[o]
-
-      // TODO handle when (output) or (1 - output) is zero
-      let d_output = output_errors[o] * activation_prime(inputs[o])
-
-      for (let i = 0; i < input_size; i++) {
-        let input = inputs[i]
-
-        // TODO handle when (input) is zero
-        let d_input = d_output * weight[i]
-        input_errors[i] += d_input
-
-        weight[i] += d_output * input * learning_rate
-      }
-
-      bias[o] += d_output * learning_rate
+      output_gradients[o] =
+        output_errors[o] * activation_prime(output_values[o])
     }
-
+    let input_errors: number[] = new Array(input_size)
+    for (let i = 0; i < input_size; i++) {
+      let acc = 0
+      for (let o = 0; o < output_size; o++) {
+        acc += output_gradients[o] * layer_weights[o][i]
+      }
+      input_errors[i] = acc
+    }
+    layer_gradients[l] = output_gradients
     output_errors = input_errors
+  }
+
+  /* 3. update weight and bias */
+
+  for (let l = 0; l < layer_size; l++) {
+    let input_size = weights[l][0].length
+    let output_size = weights[l].length
+    let layer_weights = weights[l]
+    let output_gradients = layer_gradients[l]
+    let inputs = layer_inputs[l]
+    let output_biases = biases[l]
+    for (let o = 0; o < output_size; o++) {
+      let output_weights = layer_weights[o]
+      let error_gradient = output_gradients[o]
+      for (let i = 0; i < input_size; i++) {
+        output_weights[i] -= error_gradient * inputs[i] * learning_rate
+      }
+      output_biases[o] -= error_gradient * learning_rate
+    }
   }
 
   return mse

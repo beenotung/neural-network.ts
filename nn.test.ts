@@ -12,22 +12,21 @@ import { writeFileSync } from 'fs'
 import { expect } from 'chai'
 
 let log = debug('bp-nn xor')
-log.enabled = true
+// log.enabled = true
 
 it('should train by back-propagation', () => {
-  let epochs = 2000
+  let epochs = 10000
   let min_error = 1e-6
-  let learning_rate = 0.001
+  let learning_rate = 0.1
 
   // epochs = 100_000_000
   // min_error = 1e-12
 
-  let activation = sigmoid
   let network = random_network({
     layers: [
       { size: 2, activation: linear },
-      { size: 2, activation },
-      { size: 1, activation },
+      { size: 2, activation: sigmoid },
+      { size: 1, activation: sigmoid },
     ],
   })
   let inputs = [
@@ -51,7 +50,7 @@ it('should train by back-propagation', () => {
     // }
   }
 
-  console.dir(network, { depth: 20 })
+  // console.dir(network, { depth: 20 })
 
   writeFileSync('bp-nn-xor.json', JSON.stringify(to_json(network), null, 2))
   log('saved to bp-nn-xor.json')
