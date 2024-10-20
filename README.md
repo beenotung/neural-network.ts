@@ -19,6 +19,11 @@ Zero-dependency Neural Network in Typescript
   - Compile into standalone JavaScript functions
   - Import/export in JSON format
 
+- **Activation Functions**
+
+  - Supports a wide range of activation functions: sigmoid, centered sigmoid, tanh, normalized tanh, linear, ReLU, ELU
+  - Automatic calculation of derivatives for custom activation functions
+
 - **Lightweight and Easy to Install**
 
   - No need to install or build node-gyp, CMake, CUDA, TensorFlow, Python, etc.
