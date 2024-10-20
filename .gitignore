@@ -10,3 +10,5 @@ yarn.lock
 *.csv
 *-nn-xor.js
 *-nn-xor.json
+*-nn-color.js
+*-nn-color.json
