@@ -1,5 +1,5 @@
 import { best } from 'ga-island'
-import { compile, create_ga, linear, sigmoid, to_json } from './index'
+import { compile, create_ga, linear, sigmoid, tanh, to_json } from './index'
 import { writeFileSync } from 'fs'
 import debug from 'debug'
 import { expect } from 'chai'
@@ -18,8 +18,8 @@ it('should train by genetic algorithm', () => {
     // spec: to_network_spec({ sizes: [2, 28, 28, 1], activation: relu }),
     spec: {
       layers: [
-        { size: 2, activation: linear },
-        { size: 2, activation: sigmoid },
+        { size: 2, activation: tanh },
+        { size: 2, activation: tanh },
         { size: 1, activation: sigmoid },
       ],
     },

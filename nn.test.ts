@@ -6,6 +6,7 @@ import {
   random_network,
   relu,
   sigmoid,
+  tanh,
   to_json,
 } from './index'
 import { writeFileSync } from 'fs'
@@ -24,8 +25,8 @@ it('should train by back-propagation', () => {
 
   let network = random_network({
     layers: [
-      { size: 2, activation: linear },
-      { size: 2, activation: sigmoid },
+      { size: 2, activation: tanh },
+      { size: 2, activation: tanh },
       { size: 1, activation: sigmoid },
     ],
   })
