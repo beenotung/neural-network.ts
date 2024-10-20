@@ -131,8 +131,21 @@ export function to_network_spec(options: {
   return { layers }
 }
 
+/**
+ * @description
+ *
+ * Must have at least 2 layers (input layer and output layer).
+ *
+ * Input layer must use linear activation.
+ */
 export function random_network(options: NetworkSpec): Network {
   let { layers } = options
+  if (layers.length < 2) {
+    throw new Error('expect at least 2 layers (input layer and output layer)')
+  }
+  if (layers[0].activation !== linear) {
+    throw new Error('input layer must use linear activation')
+  }
   let network: Network = {
     weights: [],
     biases: [],

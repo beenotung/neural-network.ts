@@ -22,24 +22,26 @@ it('should train by genetic algorithm', () => {
   // epochs = 100_000_000
   // min_error = 1e-12
 
+  let fitness = sample_to_fitness({
+    inputs: [
+      [0, 0],
+      [1, 0],
+      [0, 1],
+      [1, 1],
+    ],
+    targets: [[0], [1], [1], [0]],
+  })
+
   let ga = create_ga({
     // spec: to_network_spec({ sizes: [2, 28, 28, 1], activation: relu }),
     spec: {
       layers: [
-        { size: 2, activation: tanh },
-        { size: 2, activation: tanh },
+        { size: 2, activation: linear },
+        { size: 2, activation: sigmoid },
         { size: 1, activation: sigmoid },
       ],
     },
-    fitness: sample_to_fitness({
-      inputs: [
-        [0, 0],
-        [1, 0],
-        [0, 1],
-        [1, 1],
-      ],
-      targets: [[0], [1], [1], [0]],
-    }),
+    fitness,
     population_size: 1000,
     mutation_amount: 0.2,
   })
@@ -76,7 +78,7 @@ exports.inference = ${inference.toString()}
     log({ inputs, target, output })
     if (output > 0.8) output = 1
     else if (output < 0.2) output = 0
-    expect(output).to.equals(target)
+    expect(output).to.equals(target, `xor(${inputs}) -> ${target}`)
   }
 
   test([0, 0], 0)
