@@ -97,6 +97,9 @@ export function get_derivative(activation: Activation): Activation {
   )
 }
 
+/**
+ * @description calculate the derivative of activation function at x by sampling with small step.
+ */
 export function derivative(activation: Activation, x: number): number {
   let step = 2e-5
   let left = activation(x - step)
@@ -118,6 +121,10 @@ export type LayerSpec = {
   activation: Activation
 }
 
+/**
+ * @description Shortcut for network that use the same activation for all layers
+ * (except input layer which must use linear activation)
+ */
 export function to_network_spec(options: {
   sizes: number[]
   activation: Activation
@@ -133,10 +140,8 @@ export function to_network_spec(options: {
 
 /**
  * @description
- *
- * Must have at least 2 layers (input layer and output layer).
- *
- * Input layer must use linear activation.
+ *  - Must have at least 2 layers (input layer and output layer).
+ *  - Input layer must use linear activation.
  */
 export function random_network(options: NetworkSpec): Network {
   let { layers } = options
@@ -457,6 +462,10 @@ export function from_json(json: NetworkJSON): Network {
   }
 }
 
+/**
+ * @description convert sample data to fitness function.
+ * In case you really want to use GA instead of back-propagation to train the network.
+ */
 export function sample_to_fitness(args: {
   inputs: number[][]
   targets: number[][]

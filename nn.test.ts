@@ -49,6 +49,10 @@ it('should train by back-propagation', () => {
     // if (epoch % 1_000_000 == 0) {
     log(epoch.toLocaleString(), mse.toFixed(12))
     // }
+
+    if (mse < min_error) {
+      break
+    }
   }
 
   // console.dir(network, { depth: 20 })

@@ -18,7 +18,7 @@ let log = debug('ga-nn xor')
 
 it('should train by genetic algorithm', () => {
   let epochs = 2000
-  let min_error = 1e-6
+  let min_error = 0.001
 
   // epochs = 100_000_000
   // min_error = 1e-12
@@ -34,11 +34,11 @@ it('should train by genetic algorithm', () => {
   })
   fitness = network => {
     let diff = 0
-    diff += Math.pow(forward(network, [0, 0])[0] - 0, 2)
-    diff += Math.pow(forward(network, [1, 0])[0] - 1, 2)
-    diff += Math.pow(forward(network, [0, 1])[0] - 1, 2)
-    diff += Math.pow(forward(network, [1, 1])[0] - 0, 2)
-    return -diff
+    diff += (forward(network, [0, 0])[0] - 0) ** 2
+    diff += (forward(network, [1, 0])[0] - 1) ** 2
+    diff += (forward(network, [0, 1])[0] - 1) ** 2
+    diff += (forward(network, [1, 1])[0] - 0) ** 2
+    return -diff / 4
   }
 
   let ga = create_ga({
@@ -72,7 +72,7 @@ it('should train by genetic algorithm', () => {
   log('saved to ga-nn-xor.json')
 
   let inference = compile(network)
-  // log(inference.toString())
+  log(inference.toString())
 
   writeFileSync(
     'ga-nn-xor.js',
