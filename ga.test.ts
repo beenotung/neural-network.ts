@@ -2,6 +2,7 @@ import { best } from 'ga-island'
 import {
   compile,
   create_ga,
+  forward,
   linear,
   sample_to_fitness,
   sigmoid,
@@ -31,6 +32,14 @@ it('should train by genetic algorithm', () => {
     ],
     targets: [[0], [1], [1], [0]],
   })
+  fitness = network => {
+    let diff = 0
+    diff += Math.pow(forward(network, [0, 0])[0] - 0, 2)
+    diff += Math.pow(forward(network, [1, 0])[0] - 1, 2)
+    diff += Math.pow(forward(network, [0, 1])[0] - 1, 2)
+    diff += Math.pow(forward(network, [1, 1])[0] - 0, 2)
+    return -diff
+  }
 
   let ga = create_ga({
     // spec: to_network_spec({ sizes: [2, 28, 28, 1], activation: relu }),
