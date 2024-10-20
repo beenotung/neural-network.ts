@@ -444,12 +444,35 @@ export function from_json(json: NetworkJSON): Network {
   }
 }
 
+export function sample_to_fitness(args: {
+  inputs: number[][]
+  targets: number[][]
+}) {
+  let { inputs, targets } = args
+  function fitness(network: Network): number {
+    let output_size = network.biases[network.biases.length - 1].length
+    let sample_size = inputs.length
+    let error_acc = 0
+    for (let i = 0; i < sample_size; i++) {
+      let input = inputs[i]
+      let target = targets[i]
+      let output = forward(network, input)
+      for (let o = 0; o < output_size; o++) {
+        let e = target[o] - output[o]
+        error_acc += e * e
+      }
+    }
+    let mse = error_acc / output_size / sample_size
+    return -mse
+  }
+  return fitness
+}
+
 // TODO auto increase mutation_amount when the best fitness is not improving continuously
 // TODO calculate diversity for doesABeatB
 export function create_ga(args: {
   spec: NetworkSpec
-  inputs: number[][]
-  targets: number[][]
+  fitness: (network: Network) => number
   /** @example 0.2 */
   mutation_amount: number
   /**
@@ -458,7 +481,7 @@ export function create_ga(args: {
    * */
   population_size?: number
 }) {
-  let { spec, inputs, targets, mutation_amount } = args
+  let { spec, fitness, mutation_amount } = args
   let { layers } = spec
   return new GaIsland<Network>({
     populationSize: args.population_size,
@@ -492,22 +515,7 @@ export function create_ga(args: {
         }
       }
     },
-    fitness(network) {
-      let output_size = layers[layers.length - 1].size
-      let sample_size = inputs.length
-      let error_acc = 0
-      for (let i = 0; i < sample_size; i++) {
-        let input = inputs[i]
-        let target = targets[i]
-        let output = forward(network, input)
-        for (let o = 0; o < output_size; o++) {
-          let e = target[o] - output[o]
-          error_acc += e * e
-        }
-      }
-      let mse = error_acc / output_size / sample_size
-      return -mse
-    },
+    fitness,
     randomIndividual() {
       return random_network(spec)
     },

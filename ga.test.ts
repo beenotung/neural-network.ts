@@ -1,5 +1,13 @@
 import { best } from 'ga-island'
-import { compile, create_ga, linear, sigmoid, tanh, to_json } from './index'
+import {
+  compile,
+  create_ga,
+  linear,
+  sample_to_fitness,
+  sigmoid,
+  tanh,
+  to_json,
+} from './index'
 import { writeFileSync } from 'fs'
 import debug from 'debug'
 import { expect } from 'chai'
@@ -23,13 +31,15 @@ it('should train by genetic algorithm', () => {
         { size: 1, activation: sigmoid },
       ],
     },
-    inputs: [
-      [0, 0],
-      [1, 0],
-      [0, 1],
-      [1, 1],
-    ],
-    targets: [[0], [1], [1], [0]],
+    fitness: sample_to_fitness({
+      inputs: [
+        [0, 0],
+        [1, 0],
+        [0, 1],
+        [1, 1],
+      ],
+      targets: [[0], [1], [1], [0]],
+    }),
     population_size: 1000,
     mutation_amount: 0.2,
   })
