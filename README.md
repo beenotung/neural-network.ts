@@ -9,16 +9,28 @@ Zero-dependency Neural Network in Typescript
 
 ## Features
 
-- Duel mode training
-  - Train with back propagation
-  - Evolve neural network with genetic algorithm
-- Compile neural network into standalone javascript function
-- Export / import in json
-- Zero-dependency
-- Lightweight (without node-gpy, cmake, python, cuda)
-- Typescript support
-- Isomorphic package: works in Node.js and browsers
-- Works with plain Javascript, Typescript is not mandatory
+- **Duel Mode Training**
+
+  - Train with back-propagation (Supervised Learning)
+  - Evolve neural network with genetic algorithm (Reinforcement Learning)
+
+- **Neural Network Export**
+
+  - Compile into standalone JavaScript functions
+  - Import/export in JSON format
+
+- **Lightweight and Easy to Install**
+
+  - No need to install or build node-gyp, CMake, CUDA, TensorFlow, Python, etc.
+  - Only depends on [ga-island](https://github.com/beenotung/ga-island), which is 1.4 KB gzipped and has no additional dependencies
+
+- **Typescript / JavaScript Compatibility**
+
+  - Optional TypeScript support
+  - Support usage from Javascript without further build/bundle steps
+
+- **Isomorphic Package**
+  - Works in both Node.js and browser environments
 
 ## Installation
 
