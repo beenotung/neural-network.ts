@@ -1,6 +1,6 @@
 # neural-network.ts
 
-Zero-dependency Neural Network in Typescript
+Lightweight TypeScript neural network library with back-propagation and genetic algorithms, supporting a wide range of activation functions, all without extra build or native dependencies.
 
 [![npm Package Version](https://img.shields.io/npm/v/neural-network.ts)](https://www.npmjs.com/package/neural-network.ts)
 [![Minified Package Size](https://img.shields.io/bundlephobia/min/neural-network.ts)](https://bundlephobia.com/package/neural-network.ts)
