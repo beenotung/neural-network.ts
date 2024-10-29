@@ -5,7 +5,6 @@ Lightweight TypeScript neural network library with back-propagation and genetic 
 [![npm Package Version](https://img.shields.io/npm/v/neural-network.ts)](https://www.npmjs.com/package/neural-network.ts)
 [![Minified Package Size](https://img.shields.io/bundlephobia/min/neural-network.ts)](https://bundlephobia.com/package/neural-network.ts)
 [![Minified and Gzipped Package Size](https://img.shields.io/bundlephobia/minzip/neural-network.ts)](https://bundlephobia.com/package/neural-network.ts)
-[![npm Package Downloads](https://img.shields.io/npm/dm/neural-network.ts)](https://www.npmtrends.com/neural-network.ts)
 
 ## Features
 
