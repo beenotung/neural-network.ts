@@ -1,6 +1,6 @@
 {
   "name": "neural-network.ts",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Lightweight TypeScript neural network library with back-propagation and genetic algorithms, supporting a wide range of activation functions, all without extra build or native dependencies.",
   "keywords": [
     "neural-network",
